@@ -1,0 +1,164 @@
+---
+title: "ME315_Lista03"
+format: typst
+editor: source
+---
+
+## Conexão R \>\> SQlite
+
+```{r}
+library(DBI)
+library(RSQLite)
+
+con <- dbConnect(SQLite(), "me315.sqlite")
+```
+
+```{sql connection = con}
+SELECT * 
+FROM PRESERVE
+```
+
+```{sql connection = con}
+SELECT * 
+FROM EMPLOYEE
+```
+
+### Hands - on
+
+01\) Exiba os valores de `STATE` e `FEE` da tabela `PRESERVE` mas sem duplicados.
+
+```{sql connection = con}
+SELECT DISTINCT STATE, FEE
+FROM PRESERVE 
+```
+
+02\) Exiba todos os valores de DNO na tabela EMPLOYEE. Não exiba valores duplicados.
+
+```{sql connection  = con}
+SELECT DISTINCT DNO
+FROM EMPLOYEE
+```
+
+03\) Execute as QUERYS a seguir. Examine as tabelas resultantes e faça as observações relevantes.
+
+```{sql connection = con}
+SELECT DNO, SALARY FROM EMPLOYEE
+```
+
+Nesse primeiro caso, resgatamos a DNO e o salário independente da ordem e simplesmente printamos todos.
+
+```{sql connection = con}
+SELECT DISTINCT DNO, SALARY FROM EMPLOYEE
+```
+
+Aqui nesse caso, estamos pegando os resultados distintos, ou seja, não teremos linhas iguais, o DNO ate aparece com valores iguais mas corresponde a um salario diferente.
+
+```{sql connection = con}
+SELECT DISTINCT DNO, SALARY FROM EMPLOYEE ORDER BY DNO, SALARY
+```
+
+04) Exiba todas as informações sobre qualquer reserva natural em Montana que seja menor que 1.000 acres.
+
+```{sql connection = con}
+SELECT *
+FROM PRESERVE
+WHERE STATE = 'MT' AND ACRES < 1000
+```
+
+05) Exiba todas as informações sobre qualquer reserva natural cujo valor de ACRES esteja entre 1200 e 15000, inclusive.
+
+```{sql connection = con}
+SELECT * 
+FROM PRESERVE 
+WHERE ACRES >= 1200 AND ACRES <= 15000
+```
+
+06) Exiba todas as informações sobre qualquer reserva natural localizada em Montana que não possua taxa de entrada e seja maior que 10.000 acres.
+
+```{sql connection = con}
+SELECT *
+FROM PRESERVE
+WHERE STATE = 'MT' AND FEE = 0 AND ACRES > 10000
+```
+
+07) Exiba todas as informações sobre as reservas naturais localizadas em Montana ou Massachusetts.
+
+```{sql connection = con}
+SELECT *
+FROM PRESERVE 
+WHERE STATE = 'MT' OR STATE = 'MA'
+```
+
+08) Exiba todas as informações sobre qualquer reserva natural localizada em Montana ou qualquer reserva que seja menor que 1.000 acres.
+
+```{sql connection = con}
+SELECT * 
+FROM PRESERVE
+WHERE STATE = 'MT' OR ACRES < 1000
+```
+
+09) Exiba o número e o nome de qualquer reserva natural que possua taxa de entrada que não seja igual a zero.
+
+```{sql connection = con}
+SELECT PNO, PNAME 
+FROM PRESERVE 
+WHERE FEE <> 0
+```
+
+10) Exiba o número e o nome das reservas naturais que não possuem taxa de entrada de 3,00 e não possuem taxa de 10,00.
+
+```{sql connection = con}
+SELECT PNO, PNAME 
+FROM PRESERVE 
+WHERE (FEE <> 3) AND (FEE <> 10)
+```
+
+11) Exiba todas as informações sobre qualquer reserva natural localizada no Arizona que não possua taxa de entrada, ou qualquer reserva que seja menor que 100 acres (independentemente de seus valores de STATE e FEE).
+
+```{sql connection = con}
+SELECT *
+FROM PRESERVE
+WHERE (STATE = 'AZ' AND FEE = 0)
+   OR ACRES < 100
+```
+
+12) Exiba todas as informações sobre qualquer reserva natural que seja menor que 1.000 acres e tenha taxa de entrada de zero dólares ou esteja localizada no Arizona.
+
+```{sql connection = con}
+SELECT * 
+FROM PRESERVE 
+WHERE (ACRES < 1000 AND FEE = 0) OR (STATE = 'AZ')
+```
+
+
+13) Selecione todas as informações sobre qualquer reserva natural com taxa de entrada que não seja maior que zero, ou qualquer outra reserva, independentemente de sua taxa, que esteja localizada em Montana e seja maior que 1.000 acres
+
+```{sql connection = con}
+SELECT *
+FROM PRESERVE
+WHERE FEE <= 0 OR (STATE = 'MT' AND ACRES > 1000);
+```
+
+14) Exiba todas as informações sobre todas as reservas naturais, exceto aquelas reservas de Montana sem taxa de entrada.
+
+```{sql connection = con}
+SELECT *
+FROM PRESERVE
+WHERE NOT (STATE = 'MT' AND FEE = 0)
+```
+
+15) Sim, são equivalentes pelas leis distributivas de Morgan 
+
+16) Sim, são equivalentes. Também é a propriedade distributiva, agora do OR sobre oAND: A OR (B AND C) ≡ (A OR B) AND (A OR C)
+
+17) A 1ª e a 3ª são equivalentes; a 2ª não é.
+
+18) Na mesma situação, 1ª e a 3ª são equivalentes; a 2ª não é.
+
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
+
+
+
