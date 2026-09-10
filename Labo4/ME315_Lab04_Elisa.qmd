@@ -1,0 +1,136 @@
+---
+title: "ME315_Lab04_Elisa"
+format: html
+editor: visual
+---
+
+### Lab 04 
+
+Verificando diretórios e os caminhos
+
+```{r}
+getwd()
+list.files()
+```
+
+01) 
+
+```{r}
+library(readxl)
+library(tidyverse)
+```
+
+02) 
+
+```{r}
+fname <- "data/WDIEXCEL.xlsx"
+file.exists(fname)
+```
+
+03)
+
+```{r}
+countries <- read_excel(fname, sheet = "Country")
+```
+
+04) 
+
+```{r}
+countries %>% select(`Short Name`) %>% print(n = 10)
+```
+
+Fazendo o filtro 
+
+```{r}
+countries <- countries %>%
+  filter(`Short Name` %in% c("Brazil", "United States", "Argentina", "China", "India"))
+```
+
+05)
+
+```{r}
+WDI <- read_excel(fname, sheet = "Data")
+```
+
+06)
+
+```{r}
+WDI <- WDI %>%
+  select(`Country Code`, `Indicator Code`, as.character(1960:2018))
+```
+
+```{r}
+glimpse(WDI)
+```
+
+07) Por questão de memória, vamos filtras os países antes do pivot longer
+
+```{r}
+WDI <- WDI %>%
+  filter(`Country Code` %in% countries$`Country Code`)
+```
+
+```{r}
+WDI <- WDI %>%
+  pivot_longer(
+    cols      = as.character(1960:2018),
+    names_to  = "YEAR",
+    values_to = "value"
+  )
+
+glimpse(WDI)
+```
+
+08) 
+
+```{r}
+class(WDI$YEAR)
+
+WDI <- WDI %>%
+  mutate(YEAR = as.integer(YEAR))
+
+class(WDI$YEAR)
+```
+
+09)
+
+```{r}
+WDI <- WDI %>%
+  pivot_wider(
+    names_from  = `Indicator Code`,
+    values_from = value
+  )
+
+WDI <- WDI %>%
+  left_join(countries %>% select(`Country Code`, `Short Name`), by = "Country Code") %>%
+  select(`Country Code`, `Short Name`, YEAR, SP.DYN.CBRT.IN)
+```
+
+10)
+
+```{r}
+WDI <- WDI %>%
+  arrange(`Country Code`, YEAR)
+```
+
+11) 
+
+```{r}
+ggplot(WDI, aes(x = YEAR, y = SP.DYN.CBRT.IN, color = `Short Name`)) +
+  geom_line() +
+  labs(
+    x     = "Ano",
+    y     = "Taxa de natalidade (SP.DYN.CBRT.IN)",
+    color = "País"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
+
+
+
+
