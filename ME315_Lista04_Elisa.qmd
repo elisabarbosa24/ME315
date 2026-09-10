@@ -1,0 +1,213 @@
+---
+title: "ME315_Lista04_Elisa"
+format: pdf
+editor: source
+---
+
+## Conexão R \>\> SQlite
+
+```{r}
+library(DBI)
+library(RSQLite)
+
+con <- dbConnect(SQLite(), "me315.sqlite")
+```
+
+```{sql connection = con}
+SELECT * 
+FROM PRESERVE
+```
+
+```{sql connection = con}
+SELECT * 
+FROM EMPLOYEE
+```
+
+### Hands - on
+
+01) Exiba todas as informações de qualquer reserva natural que possua um número de reserva no conjunto {2, 4, 6, 8, 10}.
+
+```{sql connection=con}
+SELECT *
+FROM PRESERVE
+WHERE PNO IN (2, 4, 6, 8, 10)
+```
+
+02) Exiba todas as informações sobre todas as reservas naturais, exceto: DANCING PRAIRIE, MULESHOE RANCH, MCELWAIN-OLSEN e TATKON.
+
+```{sql connection=con}
+SELECT * 
+FROM PRESERVE 
+WHERE PNAME NOT IN ('DANCING PRAIRIE', 'MULESHOE RANCH', 'MCELWAIN-OLSEN', 'TATKON')
+```
+
+03) Exiba todas as informações de qualquer reserva natural que possua um valor de PNO entre e incluindo 3 e 10.
+
+```{sql connection=con}
+SELECT *
+FROM PRESERVE
+WHERE PNO BETWEEN 3 AND 10
+```
+
+04) Exiba todas as informações de qualquer reserva natural que possua um valor de PNO menor que 3 ou maior que 10.
+
+```{sql connection=con}
+SELECT *
+FROM PRESERVE
+WHERE PNO < 3 OR PNO > 10
+```
+
+05) Exiba o estado, o número da reserva e o tamanho de qualquer reserva natural que não esteja em Montana e não esteja no Arizona e seja menor que 50 acres ou maior que 800 acres. Ordene o resultado pelo número da reserva em sequência descendente
+
+```{sql connection=con}
+SELECT STATE, PNO, ACRES
+FROM PRESERVE
+WHERE STATE NOT IN ('MT', 'AZ')
+  AND (ACRES < 50 OR ACRES > 800)
+ORDER BY PNO DESC
+```
+
+(Professor, tava dando trabalho copiar os enunciados, mas continua a lista organizadinha)
+
+06) 
+
+```{sql connection=con}
+SELECT PNAME
+FROM PRESERVE
+WHERE PNAME LIKE 'D%'
+```
+
+07) 
+
+```{sql connection=con}
+SELECT PNAME
+FROM PRESERVE
+WHERE PNAME LIKE '%TOWN%'
+```
+
+08) 
+
+```{sql connection=con}
+SELECT PNAME
+FROM PRESERVE
+WHERE PNAME LIKE '%PRAIRIE'
+```
+
+09) 
+
+```{sql connection=con}
+SELECT PNAME
+FROM PRESERVE
+WHERE PNAME LIKE '%ING%'
+```
+
+10) 
+
+```{sql connection=con}
+SELECT PNAME
+FROM PRESERVE
+WHERE PNAME LIKE '%E'
+```
+
+11)
+
+```{sql connection=con}
+SELECT PNAME
+FROM PRESERVE
+WHERE PNAME LIKE '%ME%'
+```
+
+12) 
+
+```{sql connection=con}
+SELECT PNAME
+FROM PRESERVE
+WHERE PNAME LIKE '%M%E%'
+```
+
+13) 
+
+```{sql connection=con}
+SELECT PNAME
+FROM PRESERVE
+WHERE PNAME LIKE '_A%'
+```
+
+14)
+
+```{sql connection=con}
+SELECT PNAME
+FROM PRESERVE
+WHERE PNAME LIKE '% %'
+```
+
+15)
+
+```{sql connection=con}
+SELECT PNAME
+FROM PRESERVE
+WHERE PNAME LIKE '%FARM%'
+   OR PNAME LIKE '%SWAMP%'
+   OR PNAME LIKE '%PRAIRIE%'
+```
+
+16)
+
+```{sql connection=con}
+SELECT PNAME
+FROM PRESERVE
+WHERE PNAME LIKE '%.%'
+   OR PNAME LIKE '%-%'
+```
+
+17)
+
+```{sql connection=con}
+SELECT PNAME
+FROM PRESERVE
+WHERE PNAME LIKE '____R%PRAIRIE'
+```
+
+##### Tabela employee
+
+18)
+
+```{sql connection=con}
+SELECT *
+FROM EMPLOYEE
+WHERE DNO IN (10, 40)
+```
+
+19) 
+
+```{sql connection=con}
+SELECT *
+FROM EMPLOYEE
+WHERE DNO NOT IN (10, 40)
+```
+
+20)
+
+```{sql connection=con}
+SELECT *
+FROM EMPLOYEE
+WHERE SALARY BETWEEN 500.00 AND 2000.00
+```
+
+21) 
+
+```{sql connection=con}
+SELECT *
+FROM EMPLOYEE
+WHERE SALARY < 500.00 OR SALARY > 2000.00
+```
+
+
+
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
+
+
+
