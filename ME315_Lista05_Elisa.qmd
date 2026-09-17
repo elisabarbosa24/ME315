@@ -1,0 +1,139 @@
+---
+title: "ME315_Lista05_Elisa"
+format: pdf
+editor: visual
+---
+
+## Lista 5
+
+```{r}
+library(DBI)
+library(RSQLite)
+
+con <- dbConnect(SQLite(), "me315.sqlite")
+```
+
+```{sql connection=con}
+select *
+from preserve
+```
+
+```{sql connection=con}
+select *
+from employee
+```
+
+### Hands-on
+
+#### Tabela preserve
+
+1)  
+
+```{sql connection=con}
+SELECT PNAME, ACRES AS AREA_ATUAL, ACRES * 1,20 AS NOVA_AREA
+FROM PRESERVE
+```
+
+2)  
+
+```{sql connection=con}
+SELECT PNAME, ACRES AS AREA_ATUAL, ACRES / 3 AS AREA_AJUSTADA
+FROM PRESERVE
+```
+
+3)  
+
+```{sql connection=con}
+SELECT PNAME, FEE AS TAXA_ATUAL, (FEE + 50) / 2 AS TAXA_AJUSTADA
+FROM PRESERVE
+```
+
+4)  
+
+```{sql connection=con}
+SELECT AVG(ACRES) AS MEDIA_ACRES, MAX(ACRES) AS MAX_ACRES, MIN(ACRES) AS MIN_ACRES
+FROM PRESERVE
+WHERE STATE = 'AZ'
+```
+
+5)  
+
+```{sql connection=con}
+SELECT PNAME
+FROM PRESERVE
+ORDER BY PNAME ASC
+LIMIT 1
+```
+
+6)  
+
+```{sql connection=con}
+SELECT COUNT(DISTINCT FEE) AS QTD_TAXAS_DISTINTAS
+FROM PRESERVE
+WHERE FEE <> 0
+```
+
+7)  
+
+```{sql connection=con}
+SELECT PNAME, COUNT(*) AS QTD
+FROM PRESERVE
+GROUP BY PNAME
+HAVING COUNT(*) > 1
+```
+
+Como não retornou nenhuma linha, não há PNAME duplicado.
+
+8)  
+
+```{sql connection=con}
+SELECT AVG(ACRES * 0.02) AS TAXA_MEDIA_AZ
+FROM PRESERVE
+WHERE STATE = 'AZ'
+```
+
+#### Tabela employee
+
+9)  
+
+```{sql connection=con}
+SELECT ENO, ENAME, SALARY AS OLDSALARY, SALARY * 1.10 AS NEWSALARY
+FROM EMPLOYEE
+ORDER BY NEWSALARY
+```
+
+10) 
+
+```{sql connection=con}
+SELECT ENO, ENAME, SALARY AS OLDSALARY, SALARY * 1.10 AS NEWSALARY
+FROM EMPLOYEE
+WHERE SALARY * 1.10 > 2000
+ORDER BY NEWSALARY
+```
+
+11) 
+
+```{sql connection=con}
+SELECT SUM(SALARY) AS SOMA, AVG(SALARY) AS MEDIA, MAX(SALARY) AS MAXIMO, MIN(SALARY) AS MINIMO
+FROM EMPLOYEE
+```
+
+12) 
+
+```{sql connection=con}
+SELECT COUNT(*) AS QTD_FUNCIONARIOS
+FROM EMPLOYEE
+WHERE DNO = 20
+```
+
+13) 
+
+```{sql connection=con}
+SELECT COUNT(DISTINCT DNO) AS QTD_DEPARTAMENTOS
+FROM EMPLOYEE
+```
+
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
