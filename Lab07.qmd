@@ -1,0 +1,151 @@
+---
+title: "Laboratorio07"
+format: html
+editor: visual
+---
+
+## Resoluções - Lab 07
+
+01\) Baixe o arquivo `uwmadison.sqlite3`. Conecte-se a ele usando o pacote `RSQLite`, armazenando a conexão em uma variável `conn`
+
+```{r}
+library(RSQLite)
+
+conn <- dbConnect(SQLite(), "database.sqlite3")
+
+# conferindo as tabelas disponíveis
+dbListTables(conn)
+```
+
+02\) Quem são e quantos são os professores que lecionaram disciplinas cujo tópico era estatística (`subjects.abbreviation='STAT'`)
+
+```{r}
+query_profs <- "
+SELECT DISTINCT i.id, i.name
+FROM instructors i
+INNER JOIN teachings t          ON t.instructor_id = i.id
+INNER JOIN sections s           ON s.uuid = t.section_uuid
+INNER JOIN course_offerings co  ON co.uuid = s.course_offering_uuid
+INNER JOIN subject_memberships sm ON sm.course_offering_uuid = co.uuid
+INNER JOIN subjects sub         ON sub.code = sm.subject_code
+WHERE sub.abbreviation = 'STAT'
+"
+
+profs_stat <- dbGetQuery(conn, query_profs)
+
+nrow(profs_stat)   # quantos são
+profs_stat         # quem são
+```
+
+03\)
+
+a\.
+
+```{r}
+query_prof_gpa <- "
+SELECT
+  i.id   AS instructor_id,
+  i.name AS instructor_name,
+  gd.a_count, gd.ab_count, gd.b_count, gd.bc_count,
+  gd.c_count, gd.d_count, gd.f_count
+FROM grade_distributions gd
+INNER JOIN course_offerings co ON co.uuid = gd.course_offering_uuid
+INNER JOIN subject_memberships sm ON sm.course_offering_uuid = co.uuid
+INNER JOIN subjects sub ON sub.code = sm.subject_code
+INNER JOIN sections s ON s.course_offering_uuid = co.uuid
+                       AND s.number = gd.section_number
+INNER JOIN teachings t ON t.section_uuid = s.uuid
+INNER JOIN instructors i ON i.id = t.instructor_id
+WHERE sub.abbreviation = 'STAT'
+"
+
+dados_prof <- dbGetQuery(conn, query_prof_gpa)
+```
+
+b\.
+
+```{r}
+query_disc_gpa <- "
+SELECT
+  c.uuid   AS course_uuid,
+  c.number AS course_number,
+  c.name   AS course_name,
+  gd.a_count, gd.ab_count, gd.b_count, gd.bc_count,
+  gd.c_count, gd.d_count, gd.f_count
+FROM grade_distributions gd
+INNER JOIN course_offerings co ON co.uuid = gd.course_offering_uuid
+INNER JOIN courses c ON c.uuid = co.course_uuid
+INNER JOIN subject_memberships sm ON sm.course_offering_uuid = co.uuid
+INNER JOIN subjects sub ON sub.code = sm.subject_code
+WHERE sub.abbreviation = 'STAT'
+"
+
+dados_disc <- dbGetQuery(conn, query_disc_gpa)
+```
+
+c\.
+
+Observação: Nessa questão precisamos conferir como dados_prof estava chegando, como estava como numerico foi necessario fazer uma conversao.
+
+```{r}
+str(dados_prof)
+```
+
+```{r}
+cols_notas <- c("a_count", "ab_count", "b_count", "bc_count",
+                "c_count", "d_count", "f_count")
+
+dados_prof[cols_notas] <- lapply(dados_prof[cols_notas], as.numeric)
+
+str(dados_prof)  # conferir que virou "num" agora
+```
+
+```{r}
+str(dados_disc)
+dados_disc[cols_notas] <- lapply(dados_disc[cols_notas], as.numeric)
+```
+
+```{r}
+calcula_gpa <- function(df) {
+  df$pontos <- 4  *df$a_count  + 3.5*df$ab_count + 3*df$b_count +
+               2.5*df$bc_count + 2  *df$c_count  + 1*df$d_count +
+               0  *df$f_count
+  df$alunos <- df$a_count + df$ab_count + df$b_count + df$bc_count +
+               df$c_count + df$d_count + df$f_count
+  df
+}
+
+dados_prof <- calcula_gpa(dados_prof)
+dados_disc <- calcula_gpa(dados_disc)
+
+# Agregando por professor
+por_prof <- aggregate(cbind(pontos, alunos) ~ instructor_id + instructor_name,
+                       data = dados_prof, sum)
+por_prof$gpa_medio <- por_prof$pontos / por_prof$alunos
+
+# professor mais difícil (menor GPA médio) e mais fácil (maior)
+por_prof[which.min(por_prof$gpa_medio), ]
+por_prof[which.max(por_prof$gpa_medio), ]
+
+# Agregando por disciplina
+por_disc <- aggregate(cbind(pontos, alunos) ~ course_uuid + course_number + course_name,
+                       data = dados_disc, sum)
+por_disc$gpa_medio <- por_disc$pontos / por_disc$alunos
+
+# disciplina mais difícil e mais fácil
+por_disc[which.min(por_disc$gpa_medio), ]
+por_disc[which.max(por_disc$gpa_medio), ]
+```
+
+04\) Desconectar o banco
+
+```{r}
+dbDisconnect(conn)
+```
+
+### Horario de compilação
+
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
